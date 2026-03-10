@@ -13,4 +13,13 @@ const validateSignUpData = (userData) => {
     // }
 }
 
-module.exports = { validateSignUpData };
+const validateProfileEditData = (updateData) => {
+    const allowedFields = ['name', 'age'];
+    const updateFields = Object.keys(updateData);
+    const isValidUpdate = updateFields.every(field => allowedFields.includes(field));
+    if (!isValidUpdate) {
+        throw new Error('Invalid update fields');
+    }
+}
+
+module.exports = { validateSignUpData, validateProfileEditData };

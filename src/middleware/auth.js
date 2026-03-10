@@ -4,7 +4,6 @@ const User = require('./../models/user');
 const userAuth = async (req, res, next) => {
 
     try {
-
         const { token } = req.cookies;
         if (!token) {
             return res.status(401).send("Unauthorized Access");
@@ -13,7 +12,7 @@ const userAuth = async (req, res, next) => {
             token,
             process.env.JWT_SECRET
         );
-        const userDetails = await User.findById(decoded.userId).select("-password");
+        const userDetails = await User.findById(decoded.userId);
         if (!userDetails) {
             return res.status(404).send("User not found");
         }
@@ -21,9 +20,7 @@ const userAuth = async (req, res, next) => {
         next();
     }
     catch (e) {
-
         console.log("AUTH ERROR:", e.message);
-
         return res.status(401).send(e.message);
     }
 };
