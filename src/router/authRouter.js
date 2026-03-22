@@ -48,23 +48,28 @@ authRouter.post('/logout', (req, res) => {
 })
 
 authRouter.put('/changePassword', userAuth, async (req, res) => {
-    const { oldPassword, newPassword, confirmNewPassword } = req.body;
     try {
-        const userDetails = req.userDetails;
-        const isOldPasswordValid = await userDetails.validatePassword(oldPassword);
-        if (!isOldPasswordValid) {
-            throw new Error('Old password is incorrect');
+        const { oldPassword, newPassword, confirmNewPassword } = req.body;
+        if (!oldPassword || !newPassword || !confirmNewPassword) {
+            return res.status(400).json({ message: "All fields are required" });
         }
         if (newPassword !== confirmNewPassword) {
-            throw new Error('New password and confirm password do not match');
+            return res.status(400).json({ message: "Passwords do not match" });
         }
-        const encryptedPassword = await bcrypt.hash(newPassword, 10);
-        userDetails.password = encryptedPassword;
-        await userDetails.save();
-        res.send('Password changed successfully');
-    } catch (e) {
-        res.status(400).send(`Something went wrong ${e}`)
+        if (oldPassword === newPassword) {
+            return res.status(400).json({ message: "New password must be different" });
+        }
+        const user = req.userDetails;
+        const isValid = await user.validatePassword(oldPassword);
+        if (!isValid) {
+            return res.status(401).json({ message: "Old password incorrect" });
+        }
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
     }
-})
+});
 
 module.exports = authRouter;
