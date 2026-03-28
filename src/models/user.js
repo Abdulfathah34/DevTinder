@@ -33,8 +33,7 @@ const userSchema = new Schema({
     })
 
 userSchema.methods.validatePassword = async function (password) {
-    const user = this;
-    const passwordHashValue = user.password;
+    const passwordHashValue = this.password;
     const isPasswordValid = await bcrypt.compare(
         password,
         passwordHashValue
